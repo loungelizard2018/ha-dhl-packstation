@@ -35,13 +35,12 @@ jobs:
           docs_dir = root / 'docs/images'
           docs_dir.mkdir(parents=True, exist_ok=True)
 
-          # Rebuild red from exactly the same source, resolution and detail as green.
           green_path = image_dir / 'packstation_green.webp'
           im = Image.open(green_path).convert('RGB')
           rgb = np.asarray(im).astype(np.int16)
           r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
           hsv = np.asarray(im.convert('HSV')).astype(np.float32)
-          h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+          _, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
           mask = (g > r + 6) & (g > b + 4) & (s > 22) & (v > 22)
           result = hsv.copy()
           result[..., 0][mask] = 0
@@ -51,8 +50,6 @@ jobs:
           red = Image.fromarray(result.astype(np.uint8), 'HSV').convert('RGB')
           red.save(image_dir / 'packstation_red.webp', 'WEBP', quality=96, method=6)
 
-          # Extract the actual live-system JPEG screenshots previously committed
-          # by the repository owner, rather than generated mock-ups.
           sources = {
               'card-full.jpg': ('d18d9dd7993a69226554a5c8ba5c4eee7402bc58', 'docs/images/card-full.svg'),
               'card-compact.jpg': ('3f015c71de00daffed0f6b1a0204b169455316d0', 'docs/images/card-compact.svg'),
@@ -60,33 +57,42 @@ jobs:
           }
           for target, (commit, path) in sources.items():
               svg = subprocess.check_output(['git', 'show', f'{commit}:{path}'], text=True)
-              match = re.search(r'data:image/jpeg;base64,([^"\']+)', svg)
+              match = re.search(r'data:image/jpeg;base64,([^"\']+)', svg, flags=re.DOTALL)
               if not match:
                   raise RuntimeError(f'No embedded live screenshot found in {commit}:{path}')
-              (docs_dir / target).write_bytes(base64.b64decode(match.group(1)))
+              encoded = ''.join(match.group(1).split())
+              encoded += '=' * (-len(encoded) % 4)
+              decoded = base64.b64decode(encoded, validate=True)
+              if not decoded.startswith(b'\xff\xd8\xff'):
+                  raise RuntimeError(f'Invalid JPEG data in {commit}:{path}')
+              (docs_dir / target).write_bytes(decoded)
 
-          # Keep only one format for card documentation screenshots.
           for pattern in ('card-full.svg', 'card-compact.svg', 'card-row.svg',
                           'card-full.png', 'card-compact.png', 'card-row.png'):
               (docs_dir / pattern).unlink(missing_ok=True)
 
-          # Bump integration and frontend cache to the release the user is creating.
           manifest_path = root / 'custom_components/dhl_packstation/manifest.json'
           manifest = json.loads(manifest_path.read_text())
           manifest['version'] = '0.1.7'
           manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
 
-          for path in [root / 'custom_components/dhl_packstation/__init__.py']:
-              text = path.read_text()
-              text = re.sub(r'dhl-packstation-card\.js\?v=[0-9.]+',
-                            'dhl-packstation-card.js?v=0.1.7', text)
-              path.write_text(text)
+          init_path = root / 'custom_components/dhl_packstation/__init__.py'
+          text = init_path.read_text()
+          text = re.sub(
+              r'dhl-packstation-card\.js\?v=[0-9.]+',
+              'dhl-packstation-card.js?v=0.1.7',
+              text,
+          )
+          init_path.write_text(text)
 
-          # Remove stale or broken card-preview links, then insert the real screenshots.
           readme_path = root / 'README.md'
           readme = readme_path.read_text()
-          readme = re.sub(r'^.*docs/images/card-(?:full|compact|row)\.(?:svg|png|jpg|webp).*$\n?',
-                          '', readme, flags=re.MULTILINE)
+          readme = re.sub(
+              r'^.*docs/images/card-(?:full|compact|row)\.(?:svg|png|jpg|webp).*$\n?',
+              '',
+              readme,
+              flags=re.MULTILINE,
+          )
 
           mappings = [
               (r'(?im)^(#{2,4}\s+Full view\s*)$', r'\1\n\n![Full card from a live Home Assistant system](docs/images/card-full.jpg)'),
