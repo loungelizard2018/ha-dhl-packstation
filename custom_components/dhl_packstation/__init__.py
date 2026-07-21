@@ -17,7 +17,7 @@ from .const import CARD_URL, CONF_API_KEY, DOMAIN, PLATFORMS, STATIC_URL
 from .coordinator import DHLPackstationCoordinator
 
 _LOGGER = logging.getLogger(__name__)
-_CARD_RESOURCE_URL = f"{CARD_URL}?v=0.1.9"
+_CARD_RESOURCE_URL = f"{CARD_URL}?v=1.0.0"
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
