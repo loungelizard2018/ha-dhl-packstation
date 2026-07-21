@@ -28,7 +28,7 @@
     "step": {
       "init": {
         "title": "Configure DHL Packstation",
-        "description": "Change credentials, location, display name, or polling interval. The values are validated against DHL before they are saved.",
+        "description": "Change credentials, location, display name, or polling interval. Values are validated against DHL before saving.",
         "data": {
           "api_key": "DHL API key",
           "country_code": "Country code",
@@ -49,18 +49,86 @@
   },
   "entity": {
     "sensor": {
-      "capacity": {"name": "Capacity forecast today"},
-      "forecast_monday": {"name": "Forecast Monday"},
-      "forecast_tuesday": {"name": "Forecast Tuesday"},
-      "forecast_wednesday": {"name": "Forecast Wednesday"},
-      "forecast_thursday": {"name": "Forecast Thursday"},
-      "forecast_friday": {"name": "Forecast Friday"},
-      "forecast_saturday": {"name": "Forecast Saturday"},
-      "forecast_sunday": {"name": "Forecast Sunday"},
-      "last_update": {"name": "Last update"}
+      "capacity": {
+        "name": "Capacity forecast today",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_monday": {
+        "name": "Forecast Monday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_tuesday": {
+        "name": "Forecast Tuesday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_wednesday": {
+        "name": "Forecast Wednesday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_thursday": {
+        "name": "Forecast Thursday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_friday": {
+        "name": "Forecast Friday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_saturday": {
+        "name": "Forecast Saturday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_sunday": {
+        "name": "Forecast Sunday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "last_update": {
+        "name": "Last update"
+      }
     },
     "button": {
-      "refresh": {"name": "Refresh now"}
+      "refresh": {
+        "name": "Refresh now"
+      }
     }
   }
 }
