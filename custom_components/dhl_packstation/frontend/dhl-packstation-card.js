@@ -1,49 +1,163 @@
 const BASE = "/dhl_packstation_static";
+
 const STATUS = {
-  high: { color: "#67e86f", glow: "rgba(103,232,111,.48)", label: "Viele freie Fächer", labelHtml: "Viele freie<br>Fächer", badge: "GUTE KAPAZITÄT", image: `${BASE}/images/packstation_green.webp` },
-  low: { color: "#ffc107", glow: "rgba(255,193,7,.48)", label: "Wenige freie Fächer", labelHtml: "Wenige freie<br>Fächer", badge: "GERINGE KAPAZITÄT", image: `${BASE}/images/packstation_yellow.webp` },
-  very_low: { color: "#ff4d55", glow: "rgba(255,77,85,.52)", label: "Fast voll", labelHtml: "Fast voll", badge: "SEHR GERINGE KAPAZITÄT", image: `${BASE}/images/packstation_red.jpg` },
-  "very-low": { color: "#ff4d55", glow: "rgba(255,77,85,.52)", label: "Fast voll", labelHtml: "Fast voll", badge: "SEHR GERINGE KAPAZITÄT", image: `${BASE}/images/packstation_red.jpg` },
-  unknown: { color: "#9aa4af", glow: "rgba(154,164,175,.30)", label: "Keine Prognose", labelHtml: "Keine<br>Prognose", badge: "STATUS UNBEKANNT", image: `${BASE}/images/packstation_yellow.webp` },
+  high: {
+    color: "#67e86f",
+    glow: "rgba(103,232,111,.48)",
+    label: "Viele freie Fächer",
+    labelHtml: "Viele freie<br>Fächer",
+    badge: "GUTE KAPAZITÄT",
+    image: `${BASE}/images/packstation_green.webp`,
+  },
+  low: {
+    color: "#ffc107",
+    glow: "rgba(255,193,7,.48)",
+    label: "Wenige freie Fächer",
+    labelHtml: "Wenige freie<br>Fächer",
+    badge: "GERINGE KAPAZITÄT",
+    image: `${BASE}/images/packstation_yellow.webp`,
+  },
+  very_low: {
+    color: "#ff4d55",
+    glow: "rgba(255,77,85,.52)",
+    label: "Fast voll",
+    labelHtml: "Fast voll",
+    badge: "SEHR GERINGE KAPAZITÄT",
+    image: `${BASE}/images/packstation_red.jpg`,
+  },
+  unknown: {
+    color: "#9aa4af",
+    glow: "rgba(154,164,175,.30)",
+    label: "Keine Prognose",
+    labelHtml: "Keine<br>Prognose",
+    badge: "STATUS UNBEKANNT",
+    image: `${BASE}/images/packstation_yellow.webp`,
+  },
 };
-const DAYS = { Monday: "Mo", Tuesday: "Di", Wednesday: "Mi", Thursday: "Do", Friday: "Fr", Saturday: "Sa", Sunday: "So" };
-const ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+const DAYS = {
+  Monday: "Mo",
+  Tuesday: "Di",
+  Wednesday: "Mi",
+  Thursday: "Do",
+  Friday: "Fr",
+  Saturday: "Sa",
+  Sunday: "So",
+};
+const ORDER = Object.keys(DAYS);
+
+function normalizeStatus(value) {
+  if (value === "very-low") return "very_low";
+  return STATUS[value] ? value : "unknown";
+}
 
 class DHLPackstationCard extends HTMLElement {
   setConfig(config) {
     if (!config.entity) throw new Error("entity required");
-    this.config = { view: "full", show_map: true, show_status_text: true, ...config };
+    this.config = {
+      view: "full",
+      show_map: true,
+      show_status_text: true,
+      ...config,
+    };
     this.render();
   }
 
-  set hass(hass) { this._hass = hass; this.render(); }
-  getCardSize() { return this.config?.view === "row" ? 1 : this.config?.view === "compact" ? 4 : 8; }
+  set hass(hass) {
+    this._hass = hass;
+    this.render();
+  }
+
+  getCardSize() {
+    return this.config?.view === "row"
+      ? 1
+      : this.config?.view === "compact"
+        ? 4
+        : 8;
+  }
 
   static getStubConfig(hass) {
-    const entity = Object.keys(hass.states).find((id) => hass.states[id].attributes?.data_type === "average_capacity_by_weekday");
+    const entity = Object.keys(hass.states).find(
+      (id) => hass.states[id].attributes?.data_type === "average_capacity_by_weekday",
+    );
     return { entity: entity || "", view: "full" };
   }
 
-  static getConfigElement() { return document.createElement("dhl-packstation-card-editor"); }
-  _entity() { return this._hass?.states?.[this.config?.entity]; }
-  _statusValue() { const entity = this._entity(); return entity?.attributes?.capacity_today || entity?.state || "unknown"; }
-  _status() { return STATUS[this._statusValue()] || STATUS.unknown; }
+  static getConfigElement() {
+    return document.createElement("dhl-packstation-card-editor");
+  }
+
+  _configuredEntity() {
+    return this._hass?.states?.[this.config?.entity];
+  }
+
+  _entity() {
+    const configured = this._configuredEntity();
+    if (configured?.attributes?.data_type === "average_capacity_by_weekday") {
+      return configured;
+    }
+
+    const locationId = configured?.attributes?.location_id;
+    const candidates = Object.values(this._hass?.states || {}).filter(
+      (entity) => entity.attributes?.data_type === "average_capacity_by_weekday",
+    );
+
+    return (
+      candidates.find((entity) => entity.attributes?.location_id === locationId) ||
+      candidates[0] ||
+      configured
+    );
+  }
+
+  _statusValue() {
+    const entity = this._entity();
+    return normalizeStatus(
+      entity?.attributes?.capacity_today || entity?.state || "unknown",
+    );
+  }
+
+  _status() {
+    return STATUS[this._statusValue()] || STATUS.unknown;
+  }
+
   _title() {
     const entity = this._entity();
-    return this.config?.name || entity?.attributes?.display_name || entity?.attributes?.friendly_name || "DHL Packstation";
+    return (
+      this.config?.name ||
+      entity?.attributes?.display_name ||
+      entity?.attributes?.friendly_name ||
+      "DHL Packstation"
+    );
   }
+
   _address() {
     const attrs = this._entity()?.attributes || {};
-    return [attrs.street, attrs.postal_code, attrs.city].filter(Boolean).join(", ");
+    return [attrs.street, attrs.postal_code, attrs.city]
+      .filter(Boolean)
+      .join(", ");
   }
+
   _weekly() {
     const attrs = this._entity()?.attributes || {};
-    if (attrs.weekly_forecast) {
-      return ORDER.map((dayOfWeek) => ({ dayOfWeek, capacity: attrs.weekly_forecast[dayOfWeek] || "unknown" }));
+    const forecast = attrs.weekly_forecast || {};
+
+    if (Object.keys(forecast).length) {
+      return ORDER.map((dayOfWeek) => ({
+        dayOfWeek,
+        capacity: normalizeStatus(forecast[dayOfWeek]),
+      }));
     }
+
     const source = attrs.averageCapacityDayOfWeek || [];
-    return ORDER.map((dayOfWeek) => source.find((item) => item.dayOfWeek === dayOfWeek) || { dayOfWeek, capacity: "unknown" });
+    return ORDER.map((dayOfWeek) => {
+      const item = source.find((entry) => entry.dayOfWeek === dayOfWeek);
+      return {
+        dayOfWeek,
+        capacity: normalizeStatus(item?.capacity),
+      };
+    });
   }
+
   _mapUrl() {
     const attrs = this._entity()?.attributes || {};
     if (attrs.latitude && attrs.longitude) {
@@ -57,10 +171,19 @@ class DHLPackstationCard extends HTMLElement {
     const card = document.createElement("ha-card");
     const view = this.config.view || "full";
     card.className = view;
-    card.innerHTML = this.css() + (view === "row" ? this.row() : view === "compact" ? this.compact() : this.full());
+    card.innerHTML =
+      this.css() +
+      (view === "row"
+        ? this.row()
+        : view === "compact"
+          ? this.compact()
+          : this.full());
     card.addEventListener("click", () => {
-      const event = new Event("hass-more-info", { bubbles: true, composed: true });
-      event.detail = { entityId: this.config.entity };
+      const event = new Event("hass-more-info", {
+        bubbles: true,
+        composed: true,
+      });
+      event.detail = { entityId: this._entity()?.entity_id || this.config.entity };
       this.dispatchEvent(event);
     });
     this.replaceChildren(card);
@@ -68,11 +191,17 @@ class DHLPackstationCard extends HTMLElement {
 
   full() {
     const status = this._status();
-    const week = this._weekly().map((item) => {
-      const dayStatus = STATUS[item.capacity] || STATUS.unknown;
-      return `<div class="weekday"><span>${DAYS[item.dayOfWeek]}</span><i style="--dot:${dayStatus.color}"></i></div>`;
-    }).join("");
-    const map = this.config.show_map === false ? "" : `<a class="map" href="${this._mapUrl()}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><ha-icon icon="mdi:map-marker-outline"></ha-icon></a>`;
+    const week = this._weekly()
+      .map((item) => {
+        const dayStatus = STATUS[item.capacity] || STATUS.unknown;
+        return `<div class="weekday"><span>${DAYS[item.dayOfWeek]}</span><i style="--dot:${dayStatus.color}"></i></div>`;
+      })
+      .join("");
+    const map =
+      this.config.show_map === false
+        ? ""
+        : `<a class="map" href="${this._mapUrl()}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><ha-icon icon="mdi:map-marker-outline"></ha-icon></a>`;
+
     return `<div class="background" style="--bg:url('${status.image}');--status:${status.color};--glow:${status.glow}">
       <header>
         <div class="square"><ha-icon icon="mdi:package-variant-closed"></ha-icon></div>
@@ -120,21 +249,54 @@ class DHLPackstationCard extends HTMLElement {
 }
 
 class DHLPackstationCardEditor extends HTMLElement {
-  setConfig(config) { this.config = config; this.render(); }
-  set hass(hass) { this._hass = hass; this.render(); }
+  setConfig(config) {
+    this.config = config;
+    this.render();
+  }
+
+  set hass(hass) {
+    this._hass = hass;
+    this.render();
+  }
+
   render() {
     if (!this.config || !this._hass) return;
-    const entities = Object.keys(this._hass.states).filter((id) => this._hass.states[id].attributes?.data_type === "average_capacity_by_weekday").map((id) => `<option value="${id}" ${id === this.config.entity ? "selected" : ""}>${id}</option>`).join("");
+    const entities = Object.keys(this._hass.states)
+      .filter(
+        (id) =>
+          this._hass.states[id].attributes?.data_type ===
+          "average_capacity_by_weekday",
+      )
+      .map(
+        (id) =>
+          `<option value="${id}" ${id === this.config.entity ? "selected" : ""}>${id}</option>`,
+      )
+      .join("");
+
     this.innerHTML = `<style>.editor{display:grid;gap:12px;padding:16px}label{display:grid;gap:5px}select,input{width:100%;box-sizing:border-box;padding:10px;border-radius:8px}</style><div class="editor"><label>Entität<select id="entity">${entities}</select></label><label>Ansicht<select id="view"><option value="full" ${this.config.view === "full" ? "selected" : ""}>Groß</option><option value="compact" ${this.config.view === "compact" ? "selected" : ""}>Kompakt</option><option value="row" ${this.config.view === "row" ? "selected" : ""}>Zeile</option></select></label><label>Titel<input id="name" value="${this.config.name || ""}"></label></div>`;
-    ["entity", "view", "name"].forEach((key) => this.querySelector(`#${key}`)?.addEventListener("change", (event) => {
-      const config = { ...this.config, [key]: event.target.value };
-      if (!config.name) delete config.name;
-      this.dispatchEvent(new CustomEvent("config-changed", { detail: { config }, bubbles: true, composed: true }));
-    }));
+
+    ["entity", "view", "name"].forEach((key) =>
+      this.querySelector(`#${key}`)?.addEventListener("change", (event) => {
+        const config = { ...this.config, [key]: event.target.value };
+        if (!config.name) delete config.name;
+        this.dispatchEvent(
+          new CustomEvent("config-changed", {
+            detail: { config },
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      }),
+    );
   }
 }
 
 customElements.define("dhl-packstation-card", DHLPackstationCard);
 customElements.define("dhl-packstation-card-editor", DHLPackstationCardEditor);
 window.customCards = window.customCards || [];
-window.customCards.push({ type: "dhl-packstation-card", name: "DHL Packstation Card", description: "DHL capacity forecast", preview: true });
+window.customCards.push({
+  type: "dhl-packstation-card",
+  name: "DHL Packstation Card",
+  description: "DHL capacity forecast",
+  preview: true,
+});
