@@ -23,22 +23,33 @@ WEEKDAYS = (
     "Sunday",
 )
 
-WEEKDAY_NAMES = {
-    "Monday": "Montag",
-    "Tuesday": "Dienstag",
-    "Wednesday": "Mittwoch",
-    "Thursday": "Donnerstag",
-    "Friday": "Freitag",
-    "Saturday": "Samstag",
-    "Sunday": "Sonntag",
+WEEKDAY_TRANSLATION_KEYS = {
+    "Monday": "forecast_monday",
+    "Tuesday": "forecast_tuesday",
+    "Wednesday": "forecast_wednesday",
+    "Thursday": "forecast_thursday",
+    "Friday": "forecast_friday",
+    "Saturday": "forecast_saturday",
+    "Sunday": "forecast_sunday",
 }
+
+FORECAST_OPTIONS = ["high", "low", "very_low", "unknown"]
 
 STATUS_ICONS = {
     "high": "mdi:check-circle-outline",
     "low": "mdi:alert-circle-outline",
-    "very-low": "mdi:close-circle-outline",
+    "very_low": "mdi:close-circle-outline",
     "unknown": "mdi:help-circle-outline",
 }
+
+
+def _normalize_capacity(value: str | None) -> str:
+    """Convert DHL values to Home Assistant enum-compatible states."""
+    if value == "very-low":
+        return "very_low"
+    if value in FORECAST_OPTIONS:
+        return value
+    return "unknown"
 
 
 async def async_setup_entry(
@@ -57,11 +68,23 @@ async def async_setup_entry(
     )
 
 
-class CapacitySensor(DHLPackstationEntity, SensorEntity):
+class ForecastSensorEntity(DHLPackstationEntity, SensorEntity):
+    """Base class for translated Packstation forecast sensors."""
+
+    _attr_has_entity_name = True
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = FORECAST_OPTIONS
+
+    @property
+    def icon(self) -> str:
+        """Return an icon matching the forecast state."""
+        return STATUS_ICONS.get(self.native_value, STATUS_ICONS["unknown"])
+
+
+class CapacitySensor(ForecastSensorEntity):
     """Expose the forecast for the current local weekday."""
 
-    _attr_has_entity_name = False
-    _attr_name = "Kapazitätsprognose heute"
+    _attr_translation_key = "capacity"
     _attr_icon = "mdi:package-variant-closed"
 
     def __init__(self, coordinator: DHLPackstationCoordinator) -> None:
@@ -70,15 +93,19 @@ class CapacitySensor(DHLPackstationEntity, SensorEntity):
 
     @property
     def native_value(self) -> str:
+        """Return today's normalized forecast."""
         weekday = dt_util.now().strftime("%A")
-        return self.coordinator.data.capacity_for_weekday(weekday)
+        return _normalize_capacity(
+            self.coordinator.data.capacity_for_weekday(weekday)
+        )
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Expose station metadata and the normalized weekly forecast."""
         data = self.coordinator.data
         weekday = dt_util.now().strftime("%A")
         weekly = {
-            day: data.weekly_forecast.get(day, "unknown")
+            day: _normalize_capacity(data.weekly_forecast.get(day))
             for day in WEEKDAYS
         }
         return {
@@ -110,10 +137,8 @@ class CapacitySensor(DHLPackstationEntity, SensorEntity):
         }
 
 
-class ForecastDaySensor(DHLPackstationEntity, SensorEntity):
+class ForecastDaySensor(ForecastSensorEntity):
     """Expose the forecast for one fixed weekday."""
-
-    _attr_has_entity_name = False
 
     def __init__(
         self,
@@ -122,24 +147,23 @@ class ForecastDaySensor(DHLPackstationEntity, SensorEntity):
     ) -> None:
         super().__init__(coordinator)
         self._weekday = weekday
-        self._attr_name = f"Prognose {WEEKDAY_NAMES[weekday]}"
+        self._attr_translation_key = WEEKDAY_TRANSLATION_KEYS[weekday]
         self._attr_unique_id = (
             f"{coordinator.data.location_id}_forecast_{weekday.lower()}"
         )
 
     @property
     def native_value(self) -> str:
-        return self.coordinator.data.capacity_for_weekday(self._weekday)
-
-    @property
-    def icon(self) -> str:
-        return STATUS_ICONS.get(self.native_value, STATUS_ICONS["unknown"])
+        """Return the normalized forecast for this weekday."""
+        return _normalize_capacity(
+            self.coordinator.data.capacity_for_weekday(self._weekday)
+        )
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Expose the stable English weekday key."""
         return {
             "weekday": self._weekday,
-            "weekday_name": WEEKDAY_NAMES[self._weekday],
             "is_live_data": False,
         }
 
@@ -147,8 +171,8 @@ class ForecastDaySensor(DHLPackstationEntity, SensorEntity):
 class LastUpdateSensor(DHLPackstationEntity, SensorEntity):
     """Expose the timestamp of the last successful DHL request."""
 
-    _attr_has_entity_name = False
-    _attr_name = "Letzte Aktualisierung"
+    _attr_has_entity_name = True
+    _attr_translation_key = "last_update"
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
@@ -158,4 +182,5 @@ class LastUpdateSensor(DHLPackstationEntity, SensorEntity):
 
     @property
     def native_value(self):
+        """Return the coordinator's last successful update timestamp."""
         return self.coordinator.last_successful_update
