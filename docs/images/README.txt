@@ -1,1 +1,0 @@
-Raster previews are being replaced with binary image files. SVG previews are deprecated.
