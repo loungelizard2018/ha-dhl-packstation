@@ -1,0 +1,17 @@
+{
+  "domain": "dhl_packstation",
+  "name": "DHL Packstation Capacity",
+  "codeowners": [
+    "@loungelizard2018"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/loungelizard2018/ha-dhl-packstation",
+  "issue_tracker": "https://github.com/loungelizard2018/ha-dhl-packstation/issues",
+  "iot_class": "cloud_polling",
+  "version": "0.1.0",
+  "requirements": [],
+  "dependencies": [
+    "http",
+    "frontend"
+  ]
+}

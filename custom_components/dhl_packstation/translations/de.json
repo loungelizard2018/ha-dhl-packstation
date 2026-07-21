@@ -1,0 +1,53 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "DHL Packstation einrichten",
+        "description": "Statistische Kapazitätsprognose, kein Live-Füllstand.",
+        "data": {
+          "api_key": "DHL API-Schlüssel",
+          "country_code": "Ländercode",
+          "postal_code": "Postleitzahl",
+          "station_number": "Packstationsnummer",
+          "display_name": "Anzeigename (optional)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zu DHL fehlgeschlagen.",
+      "invalid_auth": "API-Schlüssel abgelehnt.",
+      "station_not_found": "Packstation nicht gefunden.",
+      "invalid_response": "Unerwartete DHL-Antwort.",
+      "unknown": "Unbekannter Fehler."
+    },
+    "abort": {
+      "already_configured": "Packstation bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "DHL Packstation konfigurieren",
+        "data": {
+          "display_name": "Anzeigename",
+          "update_interval": "Aktualisierungsintervall"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "capacity": {
+        "name": "Kapazitätsprognose"
+      },
+      "last_update": {
+        "name": "Letzte Aktualisierung"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Jetzt aktualisieren"
+      }
+    }
+  }
+}

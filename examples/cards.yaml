@@ -1,0 +1,14 @@
+# Full
+type: custom:dhl-packstation-card
+entity: sensor.packstation_odendorf_kapazitatsprognose
+view: full
+
+# Compact
+# type: custom:dhl-packstation-card
+# entity: sensor.packstation_odendorf_kapazitatsprognose
+# view: compact
+
+# Row
+# type: custom:dhl-packstation-card
+# entity: sensor.packstation_odendorf_kapazitatsprognose
+# view: row
