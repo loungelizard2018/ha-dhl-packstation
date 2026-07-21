@@ -107,7 +107,7 @@ view: full
 name: Packstation Odendorf
 show_map: true
 ```
-
+![Full view](docs/images/visu_style_big.png)
 ### Compact view
 
 ```yaml
@@ -115,7 +115,7 @@ type: custom:dhl-packstation-card
 entity: sensor.your_packstation_capacity_forecast_today
 view: compact
 ```
-
+![Compact view](docs/images/visu_style_compact.png)
 ### Row view
 
 ```yaml
@@ -133,7 +133,7 @@ entity: sensor.your_packstation_capacity_forecast_today
 view: row
 show_status_text: false
 ```
-
+![row view](docs/images/visu_style_line.png)
 The card automatically falls back to the correct current-day entity if an older dashboard still references one of the weekday entities from a previous prerelease.
 
 ## Automation example
