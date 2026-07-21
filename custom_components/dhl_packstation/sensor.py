@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
@@ -23,16 +28,6 @@ WEEKDAYS = (
     "Sunday",
 )
 
-WEEKDAY_TRANSLATION_KEYS = {
-    "Monday": "forecast_monday",
-    "Tuesday": "forecast_tuesday",
-    "Wednesday": "forecast_wednesday",
-    "Thursday": "forecast_thursday",
-    "Friday": "forecast_friday",
-    "Saturday": "forecast_saturday",
-    "Sunday": "forecast_sunday",
-}
-
 FORECAST_OPTIONS = ["high", "low", "very_low", "unknown"]
 
 STATUS_ICONS = {
@@ -41,6 +36,25 @@ STATUS_ICONS = {
     "very_low": "mdi:close-circle-outline",
     "unknown": "mdi:help-circle-outline",
 }
+
+
+@dataclass(frozen=True, kw_only=True)
+class ForecastDescription(SensorEntityDescription):
+    """Description for one weekday forecast entity."""
+
+    weekday: str
+
+
+WEEKDAY_DESCRIPTIONS = tuple(
+    ForecastDescription(
+        key=f"forecast_{weekday.lower()}",
+        translation_key=f"forecast_{weekday.lower()}",
+        weekday=weekday,
+        device_class=SensorDeviceClass.ENUM,
+        options=FORECAST_OPTIONS,
+    )
+    for weekday in WEEKDAYS
+)
 
 
 def _normalize_capacity(value: str | None) -> str:
@@ -62,7 +76,10 @@ async def async_setup_entry(
     async_add_entities(
         [
             CapacitySensor(coordinator),
-            *(ForecastDaySensor(coordinator, weekday) for weekday in WEEKDAYS),
+            *(
+                ForecastDaySensor(coordinator, description)
+                for description in WEEKDAY_DESCRIPTIONS
+            ),
             LastUpdateSensor(coordinator),
         ]
     )
@@ -85,7 +102,6 @@ class CapacitySensor(ForecastSensorEntity):
     """Expose the forecast for the current local weekday."""
 
     _attr_translation_key = "capacity"
-    _attr_icon = "mdi:package-variant-closed"
 
     def __init__(self, coordinator: DHLPackstationCoordinator) -> None:
         super().__init__(coordinator)
@@ -140,31 +156,36 @@ class CapacitySensor(ForecastSensorEntity):
 class ForecastDaySensor(ForecastSensorEntity):
     """Expose the forecast for one fixed weekday."""
 
+    entity_description: ForecastDescription
+
     def __init__(
         self,
         coordinator: DHLPackstationCoordinator,
-        weekday: str,
+        description: ForecastDescription,
     ) -> None:
         super().__init__(coordinator)
-        self._weekday = weekday
-        self._attr_translation_key = WEEKDAY_TRANSLATION_KEYS[weekday]
+        self.entity_description = description
         self._attr_unique_id = (
-            f"{coordinator.data.location_id}_forecast_{weekday.lower()}"
+            f"{coordinator.data.location_id}_{description.key}"
         )
 
     @property
     def native_value(self) -> str:
         """Return the normalized forecast for this weekday."""
         return _normalize_capacity(
-            self.coordinator.data.capacity_for_weekday(self._weekday)
+            self.coordinator.data.capacity_for_weekday(
+                self.entity_description.weekday
+            )
         )
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        """Expose the stable English weekday key."""
+        """Expose stable metadata for card and automation matching."""
         return {
-            "weekday": self._weekday,
+            "location_id": self.coordinator.data.location_id,
+            "weekday": self.entity_description.weekday,
             "is_live_data": False,
+            "data_type": "weekday_capacity_forecast",
         }
 
 
