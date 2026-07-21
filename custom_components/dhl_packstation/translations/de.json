@@ -50,7 +50,76 @@
   "entity": {
     "sensor": {
       "capacity": {
-        "name": "Kapazitätsprognose"
+        "name": "Kapazitätsprognose heute",
+        "state": {
+          "high": "Viele freie Fächer",
+          "low": "Wenige freie Fächer",
+          "very_low": "Fast voll",
+          "unknown": "Keine Prognose"
+        }
+      },
+      "forecast_monday": {
+        "name": "Prognose Montag",
+        "state": {
+          "high": "Viele freie Fächer",
+          "low": "Wenige freie Fächer",
+          "very_low": "Fast voll",
+          "unknown": "Keine Prognose"
+        }
+      },
+      "forecast_tuesday": {
+        "name": "Prognose Dienstag",
+        "state": {
+          "high": "Viele freie Fächer",
+          "low": "Wenige freie Fächer",
+          "very_low": "Fast voll",
+          "unknown": "Keine Prognose"
+        }
+      },
+      "forecast_wednesday": {
+        "name": "Prognose Mittwoch",
+        "state": {
+          "high": "Viele freie Fächer",
+          "low": "Wenige freie Fächer",
+          "very_low": "Fast voll",
+          "unknown": "Keine Prognose"
+        }
+      },
+      "forecast_thursday": {
+        "name": "Prognose Donnerstag",
+        "state": {
+          "high": "Viele freie Fächer",
+          "low": "Wenige freie Fächer",
+          "very_low": "Fast voll",
+          "unknown": "Keine Prognose"
+        }
+      },
+      "forecast_friday": {
+        "name": "Prognose Freitag",
+        "state": {
+          "high": "Viele freie Fächer",
+          "low": "Wenige freie Fächer",
+          "very_low": "Fast voll",
+          "unknown": "Keine Prognose"
+        }
+      },
+      "forecast_saturday": {
+        "name": "Prognose Samstag",
+        "state": {
+          "high": "Viele freie Fächer",
+          "low": "Wenige freie Fächer",
+          "very_low": "Fast voll",
+          "unknown": "Keine Prognose"
+        }
+      },
+      "forecast_sunday": {
+        "name": "Prognose Sonntag",
+        "state": {
+          "high": "Viele freie Fächer",
+          "low": "Wenige freie Fächer",
+          "very_low": "Fast voll",
+          "unknown": "Keine Prognose"
+        }
       },
       "last_update": {
         "name": "Letzte Aktualisierung"
