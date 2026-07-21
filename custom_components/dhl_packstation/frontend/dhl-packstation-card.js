@@ -23,7 +23,7 @@ const STATUS = {
     label: "Fast voll",
     labelHtml: "Fast voll",
     badge: "SEHR GERINGE KAPAZITÄT",
-    image: `${BASE}/images/packstation_red.jpg`,
+    image: `${BASE}/images/packstation_red.webp`,
   },
   unknown: {
     color: "#9aa4af",
