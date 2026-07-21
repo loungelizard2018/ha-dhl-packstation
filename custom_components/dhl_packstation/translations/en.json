@@ -3,42 +3,123 @@
     "step": {
       "user": {
         "title": "Set up DHL Packstation",
-        "description": "Statistische Kapazitätsprognose, kein Live-Füllstand.",
+        "description": "The DHL Location Finder API provides a statistical capacity forecast, not a live fill level.",
         "data": {
-          "api_key": "DHL API-Schlüssel",
-          "country_code": "Ländercode",
-          "postal_code": "Postleitzahl",
-          "station_number": "Packstationsnummer",
-          "display_name": "Anzeigename (optional)"
+          "api_key": "DHL API key",
+          "country_code": "Country code",
+          "postal_code": "Postal code",
+          "station_number": "Packstation number",
+          "display_name": "Display name (optional)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Verbindung zu DHL fehlgeschlagen.",
-      "invalid_auth": "API-Schlüssel abgelehnt.",
-      "station_not_found": "Packstation nicht gefunden.",
-      "invalid_response": "Unerwartete DHL-Antwort.",
-      "unknown": "Unbekannter Fehler."
+      "cannot_connect": "Could not connect to DHL.",
+      "invalid_auth": "The API key was rejected.",
+      "station_not_found": "The Packstation was not found.",
+      "invalid_response": "DHL returned an unexpected response.",
+      "unknown": "Unexpected error."
     },
     "abort": {
-      "already_configured": "Packstation bereits eingerichtet."
+      "already_configured": "This Packstation is already configured."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "DHL Packstation konfigurieren",
+        "title": "Configure DHL Packstation",
+        "description": "Change credentials, location, display name, or polling interval. Values are validated against DHL before saving.",
         "data": {
-          "display_name": "Anzeigename",
-          "update_interval": "Aktualisierungsintervall"
+          "api_key": "DHL API key",
+          "country_code": "Country code",
+          "postal_code": "Postal code",
+          "station_number": "Packstation number",
+          "display_name": "Display name",
+          "update_interval": "Update interval in hours"
         }
       }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to DHL.",
+      "invalid_auth": "The API key was rejected.",
+      "station_not_found": "The Packstation was not found.",
+      "invalid_response": "DHL returned an unexpected response.",
+      "unknown": "Unexpected error."
     }
   },
   "entity": {
     "sensor": {
       "capacity": {
-        "name": "Capacity forecast"
+        "name": "Capacity forecast today",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_monday": {
+        "name": "Forecast Monday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_tuesday": {
+        "name": "Forecast Tuesday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_wednesday": {
+        "name": "Forecast Wednesday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_thursday": {
+        "name": "Forecast Thursday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_friday": {
+        "name": "Forecast Friday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_saturday": {
+        "name": "Forecast Saturday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
+      },
+      "forecast_sunday": {
+        "name": "Forecast Sunday",
+        "state": {
+          "high": "Many free compartments",
+          "low": "Few free compartments",
+          "very_low": "Almost full",
+          "unknown": "No forecast"
+        }
       },
       "last_update": {
         "name": "Last update"
