@@ -4,9 +4,56 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: home-assistant/actions/hassfest@master
+
+  rebuild-red-image:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check pillow
+      - name: Rebuild matching red Packstation background
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import colorsys
+
+          image_dir = Path('custom_components/dhl_packstation/frontend/images')
+          src = image_dir / 'packstation_green.webp'
+          dst = image_dir / 'packstation_red.webp'
+          image = Image.open(src).convert('RGB')
+          pixels = image.load()
+
+          for y in range(image.height):
+              for x in range(image.width):
+                  r, g, b = pixels[x, y]
+                  h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+                  if 0.20 <= h <= 0.46 and s >= 0.18 and v >= 0.10 and g > r * 1.05:
+                      nr, ng, nb = colorsys.hsv_to_rgb(0.0, min(1.0, max(s, 0.62)), v)
+                      pixels[x, y] = (round(nr * 255), round(ng * 255), round(nb * 255))
+
+          image.save(dst, 'WEBP', quality=98, method=6)
+          check = Image.open(dst)
+          if check.size != image.size or check.width < 1500 or check.height < 1500:
+              raise RuntimeError(f'Unexpected output dimensions: {check.size}')
+          print(f'Created {dst}: {check.size[0]}x{check.size[1]}')
+          PY
+      - name: Commit image and restore workflows
+        run: |
+          git show HEAD^:.github/workflows/hassfest.yml > .github/workflows/hassfest.yml
+          rm -f .github/workflows/rebuild-red-image.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add custom_components/dhl_packstation/frontend/images/packstation_red.webp .github/workflows/hassfest.yml .github/workflows/rebuild-red-image.yml
+          git commit -m "Replace red Packstation background with full-resolution image"
+          git push
