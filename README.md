@@ -113,7 +113,7 @@ The screenshots below were captured from a live Home Assistant system.
 
 Displays the location, current forecast, status-dependent background and complete weekly forecast.
 
-![Full DHL Packstation card](docs/images/card-full.svg)
+![Full DHL Packstation card](docs/images/card-full.jpg)
 
 ```yaml
 type: custom:dhl-packstation-card
@@ -135,7 +135,7 @@ show_map: true
 
 Keeps the station graphic, station name and current forecast while omitting the weekly details.
 
-![Compact DHL Packstation card](docs/images/card-compact.svg)
+![Compact DHL Packstation card](docs/images/card-compact.jpg)
 
 ```yaml
 type: custom:dhl-packstation-card
@@ -147,7 +147,7 @@ view: compact
 
 Designed for dense dashboards and displays the station name plus forecast indicator in one line.
 
-![Row DHL Packstation card](docs/images/card-row.svg)
+![Row DHL Packstation card](docs/images/card-row.jpg)
 
 ```yaml
 type: custom:dhl-packstation-card
