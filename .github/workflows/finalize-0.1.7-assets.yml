@@ -1,0 +1,114 @@
+name: Finalize 0.1.7 assets
+
+on:
+  push:
+    paths:
+      - ".github/workflows/finalize-0.1.7-assets.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install image tools
+        run: python -m pip install --disable-pip-version-check pillow numpy
+
+      - name: Build matched red background and restore live screenshots
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import base64
+          import json
+          import numpy as np
+          import re
+          import subprocess
+
+          root = Path('.')
+          image_dir = root / 'custom_components/dhl_packstation/frontend/images'
+          docs_dir = root / 'docs/images'
+          docs_dir.mkdir(parents=True, exist_ok=True)
+
+          # Rebuild red from exactly the same source, resolution and detail as green.
+          green_path = image_dir / 'packstation_green.webp'
+          im = Image.open(green_path).convert('RGB')
+          rgb = np.asarray(im).astype(np.int16)
+          r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+          hsv = np.asarray(im.convert('HSV')).astype(np.float32)
+          h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+          mask = (g > r + 6) & (g > b + 4) & (s > 22) & (v > 22)
+          result = hsv.copy()
+          result[..., 0][mask] = 0
+          result[..., 1][mask] = np.clip(result[..., 1][mask] * 1.02, 0, 255)
+          bright = mask & (v > 225)
+          result[..., 1][bright] = np.clip(result[..., 1][bright] * 0.72, 0, 255)
+          red = Image.fromarray(result.astype(np.uint8), 'HSV').convert('RGB')
+          red.save(image_dir / 'packstation_red.webp', 'WEBP', quality=96, method=6)
+
+          # Extract the actual live-system JPEG screenshots previously committed
+          # by the repository owner, rather than generated mock-ups.
+          sources = {
+              'card-full.jpg': ('d18d9dd7993a69226554a5c8ba5c4eee7402bc58', 'docs/images/card-full.svg'),
+              'card-compact.jpg': ('3f015c71de00daffed0f6b1a0204b169455316d0', 'docs/images/card-compact.svg'),
+              'card-row.jpg': ('51eb5a2b325ce9f43a4397e02e828202a2d3b651', 'docs/images/card-row.svg'),
+          }
+          for target, (commit, path) in sources.items():
+              svg = subprocess.check_output(['git', 'show', f'{commit}:{path}'], text=True)
+              match = re.search(r'data:image/jpeg;base64,([^"\']+)', svg)
+              if not match:
+                  raise RuntimeError(f'No embedded live screenshot found in {commit}:{path}')
+              (docs_dir / target).write_bytes(base64.b64decode(match.group(1)))
+
+          # Keep only one format for card documentation screenshots.
+          for pattern in ('card-full.svg', 'card-compact.svg', 'card-row.svg',
+                          'card-full.png', 'card-compact.png', 'card-row.png'):
+              (docs_dir / pattern).unlink(missing_ok=True)
+
+          # Bump integration and frontend cache to the release the user is creating.
+          manifest_path = root / 'custom_components/dhl_packstation/manifest.json'
+          manifest = json.loads(manifest_path.read_text())
+          manifest['version'] = '0.1.7'
+          manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
+
+          for path in [root / 'custom_components/dhl_packstation/__init__.py']:
+              text = path.read_text()
+              text = re.sub(r'dhl-packstation-card\.js\?v=[0-9.]+',
+                            'dhl-packstation-card.js?v=0.1.7', text)
+              path.write_text(text)
+
+          # Remove stale or broken card-preview links, then insert the real screenshots.
+          readme_path = root / 'README.md'
+          readme = readme_path.read_text()
+          readme = re.sub(r'^.*docs/images/card-(?:full|compact|row)\.(?:svg|png|jpg|webp).*$\n?',
+                          '', readme, flags=re.MULTILINE)
+
+          mappings = [
+              (r'(?im)^(#{2,4}\s+Full view\s*)$', r'\1\n\n![Full card from a live Home Assistant system](docs/images/card-full.jpg)'),
+              (r'(?im)^(#{2,4}\s+Compact view\s*)$', r'\1\n\n![Compact card from a live Home Assistant system](docs/images/card-compact.jpg)'),
+              (r'(?im)^(#{2,4}\s+Row view\s*)$', r'\1\n\n![Row card from a live Home Assistant system](docs/images/card-row.jpg)'),
+          ]
+          inserted = 0
+          for pattern, replacement in mappings:
+              readme, count = re.subn(pattern, replacement, readme, count=1)
+              inserted += count
+
+          if inserted < 3:
+              readme += '''\n\n## Card screenshots\n\nThe images below were captured from a live Home Assistant system.\n\n### Full view\n\n![Full card from a live Home Assistant system](docs/images/card-full.jpg)\n\n### Compact view\n\n![Compact card from a live Home Assistant system](docs/images/card-compact.jpg)\n\n### Row view\n\n![Row card from a live Home Assistant system](docs/images/card-row.jpg)\n'''
+
+          readme_path.write_text(readme.rstrip() + '\n')
+          PY
+
+      - name: Commit final release assets
+        run: |
+          rm .github/workflows/finalize-0.1.7-assets.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Finalize 0.1.7 images and live documentation screenshots"
+          git push
