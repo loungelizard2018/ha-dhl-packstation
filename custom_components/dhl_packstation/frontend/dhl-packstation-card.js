@@ -2,6 +2,7 @@ const BASE = "/dhl_packstation_static";
 const STATUS = {
   high: { color: "#67e86f", glow: "rgba(103,232,111,.48)", label: "Viele freie Fächer", labelHtml: "Viele freie<br>Fächer", badge: "GUTE KAPAZITÄT", image: `${BASE}/images/packstation_green.webp` },
   low: { color: "#ffc107", glow: "rgba(255,193,7,.48)", label: "Wenige freie Fächer", labelHtml: "Wenige freie<br>Fächer", badge: "GERINGE KAPAZITÄT", image: `${BASE}/images/packstation_yellow.webp` },
+  very_low: { color: "#ff4d55", glow: "rgba(255,77,85,.52)", label: "Fast voll", labelHtml: "Fast voll", badge: "SEHR GERINGE KAPAZITÄT", image: `${BASE}/images/packstation_red.webp` },
   "very-low": { color: "#ff4d55", glow: "rgba(255,77,85,.52)", label: "Fast voll", labelHtml: "Fast voll", badge: "SEHR GERINGE KAPAZITÄT", image: `${BASE}/images/packstation_red.webp` },
   unknown: { color: "#9aa4af", glow: "rgba(154,164,175,.30)", label: "Keine Prognose", labelHtml: "Keine<br>Prognose", badge: "STATUS UNBEKANNT", image: `${BASE}/images/packstation_yellow.webp` },
 };
