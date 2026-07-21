@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048" role="img" aria-label="Illuminated parcel locker at night with red capacity icon">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#01050a"/>
+      <stop offset="0.62" stop-color="#04090f"/>
+      <stop offset="1" stop-color="#0b1118"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#101820"/>
+      <stop offset="1" stop-color="#010306"/>
+    </linearGradient>
+    <linearGradient id="locker" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd02a"/>
+      <stop offset="0.46" stop-color="#dc9f00"/>
+      <stop offset="1" stop-color="#745000"/>
+    </linearGradient>
+    <linearGradient id="side" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#695000"/>
+      <stop offset="1" stop-color="#241b00"/>
+    </linearGradient>
+    <radialGradient id="redHalo">
+      <stop offset="0" stop-color="#ff2a38" stop-opacity="0.78"/>
+      <stop offset="0.45" stop-color="#ff1729" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ff1729" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="redReflection" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff2636" stop-opacity="0.68"/>
+      <stop offset="1" stop-color="#ff2636" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="amberReflection" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d99700" stop-opacity="0.52"/>
+      <stop offset="1" stop-color="#d99700" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="25" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="wideGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="65"/>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="35" stdDeviation="35" flood-color="#000" flood-opacity="0.85"/>
+    </filter>
+    <pattern id="tiles" width="180" height="150" patternUnits="userSpaceOnUse">
+      <path d="M0 0H180V150H0Z" fill="none" stroke="#36404a" stroke-opacity="0.34" stroke-width="4"/>
+    </pattern>
+  </defs>
+
+  <rect width="2048" height="2048" fill="url(#sky)"/>
+  <path d="M0 1120C330 1040 590 1050 890 1095c330 50 700 30 1158-65v1018H0Z" fill="url(#ground)"/>
+  <rect y="1090" width="2048" height="958" fill="url(#tiles)" opacity="0.56"/>
+
+  <g opacity="0.22" fill="#071017">
+    <path d="M0 1040V780l100-120 90 105 100-170 110 150 95-105 115 155 92-120 115 175v190Z"/>
+  </g>
+
+  <g transform="translate(845 380)" filter="url(#shadow)">
+    <polygon points="0,90 915,0 1045,70 110,170" fill="#131a22"/>
+    <polygon points="110,170 1045,70 1045,950 110,990" fill="url(#locker)"/>
+    <polygon points="1045,70 1170,150 1170,965 1045,950" fill="url(#side)"/>
+    <polygon points="0,90 110,170 110,990 0,925" fill="#1a232d"/>
+    <rect x="0" y="90" width="110" height="835" fill="#151d26"/>
+
+    <g stroke="#161a1e" stroke-width="7" opacity="0.88">
+      <path d="M110 310L1045 205M110 455L1045 350M110 600L1045 495M110 745L1045 640M110 890L1045 785"/>
+      <path d="M270 150L270 974M435 130L435 967M600 112L600 960M765 95L765 955M930 78L930 952"/>
+    </g>
+
+    <polygon points="420,138 585,120 585,956 420,963" fill="#121922"/>
+    <polygon points="450,305 555,294 555,500 450,510" fill="#080d13" stroke="#303942" stroke-width="8"/>
+    <polygon points="466,326 538,318 538,441 466,448" fill="#8a8f8d" opacity="0.72"/>
+    <polygon points="465,544 540,536 540,585 465,591" fill="#080d13" stroke="#303942" stroke-width="6"/>
+
+    <polygon points="102,150 1048,48 1048,85 104,189" fill="#ffb500" opacity="0.18" filter="url(#wideGlow)"/>
+    <polygon points="130,146 1008,52 1029,72 150,168" fill="#fff6c8"/>
+  </g>
+
+  <ellipse cx="1545" cy="1050" rx="390" ry="390" fill="url(#redHalo)" filter="url(#wideGlow)"/>
+  <g transform="translate(1345 765)" fill="none" stroke="#ff3748" stroke-width="8" opacity="0.42">
+    <circle cx="210" cy="210" r="185"/>
+    <circle cx="210" cy="210" r="135"/>
+    <circle cx="210" cy="210" r="88"/>
+  </g>
+
+  <g transform="translate(1350 760)" stroke="#ff5360" stroke-width="30" stroke-linejoin="round" stroke-linecap="round" fill="#150306" filter="url(#softGlow)">
+    <path d="M55 145 215 55l165 92-165 98Z"/>
+    <path d="M55 145v210l160 96V245Z"/>
+    <path d="M380 147v208l-165 96V245Z"/>
+    <path d="M215 55v190" opacity="0"/>
+    <path d="M303 98v98"/>
+  </g>
+
+  <ellipse cx="1555" cy="1530" rx="250" ry="360" fill="url(#redReflection)" opacity="0.82" filter="url(#wideGlow)"/>
+  <ellipse cx="1125" cy="1550" rx="260" ry="410" fill="url(#amberReflection)" opacity="0.72" filter="url(#wideGlow)"/>
+
+  <g opacity="0.33" stroke="#82909c" stroke-width="3">
+    <path d="M0 1370H2048M0 1530H2048M0 1690H2048M0 1850H2048"/>
+    <path d="M180 1120 40 2048M420 1100 330 2048M680 1090 640 2048M940 1080 950 2048M1200 1060 1260 2048M1460 1040 1570 2048M1720 1020 1880 2048"/>
+  </g>
+
+  <rect width="2048" height="2048" fill="none" stroke="#000" stroke-opacity="0.45" stroke-width="30"/>
+</svg>
