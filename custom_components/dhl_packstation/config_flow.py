@@ -147,11 +147,7 @@ class DHLPackstationOptionsFlow(config_entries.OptionsFlow):
         user_input: dict[str, Any] | None = None,
     ) -> FlowResult:
         errors: dict[str, str] = {}
-
-        current = {
-            **self.entry.data,
-            **self.entry.options,
-        }
+        current = {**self.entry.data, **self.entry.options}
 
         if user_input is not None:
             client = DHLPackstationApiClient(
@@ -187,14 +183,16 @@ class DHLPackstationOptionsFlow(config_entries.OptionsFlow):
                         CONF_STATION_NUMBER: user_input[CONF_STATION_NUMBER],
                         CONF_DISPLAY_NAME: title,
                     },
-                    options={
+                )
+                return self.async_create_entry(
+                    title="",
+                    data={
                         CONF_DISPLAY_NAME: title,
                         CONF_UPDATE_INTERVAL: int(
                             user_input[CONF_UPDATE_INTERVAL]
                         ),
                     },
                 )
-                return self.async_create_entry(title="", data={})
 
         defaults = user_input or current
         return self.async_show_form(
