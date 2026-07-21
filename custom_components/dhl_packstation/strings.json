@@ -49,17 +49,18 @@
   },
   "entity": {
     "sensor": {
-      "capacity": {
-        "name": "Capacity forecast"
-      },
-      "last_update": {
-        "name": "Last update"
-      }
+      "capacity": {"name": "Capacity forecast today"},
+      "forecast_monday": {"name": "Forecast Monday"},
+      "forecast_tuesday": {"name": "Forecast Tuesday"},
+      "forecast_wednesday": {"name": "Forecast Wednesday"},
+      "forecast_thursday": {"name": "Forecast Thursday"},
+      "forecast_friday": {"name": "Forecast Friday"},
+      "forecast_saturday": {"name": "Forecast Saturday"},
+      "forecast_sunday": {"name": "Forecast Sunday"},
+      "last_update": {"name": "Last update"}
     },
     "button": {
-      "refresh": {
-        "name": "Refresh now"
-      }
+      "refresh": {"name": "Refresh now"}
     }
   }
 }
