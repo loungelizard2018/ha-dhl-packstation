@@ -29,6 +29,26 @@ Home Assistant custom integration for the DHL Location Finder capacity forecast.
 7. Open **Settings → Devices & services → Add integration**.
 8. Search for **DHL Packstation Capacity**.
 
+
+
+## DHL API key
+
+This integration requires a free DHL Developer API key.
+
+1. Create a DHL Developer account:
+   https://developer.dhl.com/
+
+2. Create an application.
+
+3. Subscribe to the **Location Finder API**.
+
+4. Generate an API key.
+
+5. Copy the API key into the Home Assistant integration setup.
+
+More information:
+https://developer.dhl.com/api-reference/location-finder
+
 ## Configuration
 
 The setup dialog asks for:
@@ -40,7 +60,6 @@ The setup dialog asks for:
 - optional display name
 
 The integration validates the values against DHL before saving them.
-
 After setup, open the integration entry and select **Configure** to change:
 
 - API key
