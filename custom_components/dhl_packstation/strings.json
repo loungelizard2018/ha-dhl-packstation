@@ -1,0 +1,53 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up DHL Packstation",
+        "description": "The DHL Location Finder API provides a statistical capacity forecast, not a live fill level.",
+        "data": {
+          "api_key": "DHL API key",
+          "country_code": "Country code",
+          "postal_code": "Postal code",
+          "station_number": "Packstation number",
+          "display_name": "Display name (optional)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to DHL.",
+      "invalid_auth": "The API key was rejected.",
+      "station_not_found": "The Packstation was not found.",
+      "invalid_response": "DHL returned an unexpected response.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This Packstation is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure DHL Packstation",
+        "data": {
+          "display_name": "Display name",
+          "update_interval": "Update interval in hours"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "capacity": {
+        "name": "Capacity forecast"
+      },
+      "last_update": {
+        "name": "Last update"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Refresh now"
+      }
+    }
+  }
+}
