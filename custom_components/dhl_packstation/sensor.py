@@ -23,6 +23,16 @@ WEEKDAYS = (
     "Sunday",
 )
 
+WEEKDAY_NAMES = {
+    "Monday": "Montag",
+    "Tuesday": "Dienstag",
+    "Wednesday": "Mittwoch",
+    "Thursday": "Donnerstag",
+    "Friday": "Freitag",
+    "Saturday": "Samstag",
+    "Sunday": "Sonntag",
+}
+
 STATUS_ICONS = {
     "high": "mdi:check-circle-outline",
     "low": "mdi:alert-circle-outline",
@@ -50,7 +60,7 @@ async def async_setup_entry(
 class CapacitySensor(DHLPackstationEntity, SensorEntity):
     """Expose the forecast for the current local weekday."""
 
-    _attr_translation_key = "capacity"
+    _attr_name = "Kapazitätsprognose heute"
     _attr_icon = "mdi:package-variant-closed"
 
     def __init__(self, coordinator: DHLPackstationCoordinator) -> None:
@@ -86,10 +96,7 @@ class CapacitySensor(DHLPackstationEntity, SensorEntity):
             "capacity_today": weekly.get(weekday, "unknown"),
             "weekly_forecast": weekly,
             "averageCapacityDayOfWeek": [
-                {
-                    "dayOfWeek": day,
-                    "capacity": weekly[day],
-                }
+                {"dayOfWeek": day, "capacity": weekly[day]}
                 for day in WEEKDAYS
             ],
             "data_type": "average_capacity_by_weekday",
@@ -112,10 +119,10 @@ class ForecastDaySensor(DHLPackstationEntity, SensorEntity):
     ) -> None:
         super().__init__(coordinator)
         self._weekday = weekday
+        self._attr_name = f"Prognose {WEEKDAY_NAMES[weekday]}"
         self._attr_unique_id = (
             f"{coordinator.data.location_id}_forecast_{weekday.lower()}"
         )
-        self._attr_translation_key = f"forecast_{weekday.lower()}"
 
     @property
     def native_value(self) -> str:
@@ -129,6 +136,7 @@ class ForecastDaySensor(DHLPackstationEntity, SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         return {
             "weekday": self._weekday,
+            "weekday_name": WEEKDAY_NAMES[self._weekday],
             "is_live_data": False,
         }
 
@@ -136,7 +144,7 @@ class ForecastDaySensor(DHLPackstationEntity, SensorEntity):
 class LastUpdateSensor(DHLPackstationEntity, SensorEntity):
     """Expose the timestamp of the last successful DHL request."""
 
-    _attr_translation_key = "last_update"
+    _attr_name = "Letzte Aktualisierung"
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
