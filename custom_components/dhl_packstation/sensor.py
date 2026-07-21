@@ -60,6 +60,7 @@ async def async_setup_entry(
 class CapacitySensor(DHLPackstationEntity, SensorEntity):
     """Expose the forecast for the current local weekday."""
 
+    _attr_has_entity_name = False
     _attr_name = "Kapazitätsprognose heute"
     _attr_icon = "mdi:package-variant-closed"
 
@@ -112,6 +113,8 @@ class CapacitySensor(DHLPackstationEntity, SensorEntity):
 class ForecastDaySensor(DHLPackstationEntity, SensorEntity):
     """Expose the forecast for one fixed weekday."""
 
+    _attr_has_entity_name = False
+
     def __init__(
         self,
         coordinator: DHLPackstationCoordinator,
@@ -144,6 +147,7 @@ class ForecastDaySensor(DHLPackstationEntity, SensorEntity):
 class LastUpdateSensor(DHLPackstationEntity, SensorEntity):
     """Expose the timestamp of the last successful DHL request."""
 
+    _attr_has_entity_name = False
     _attr_name = "Letzte Aktualisierung"
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     _attr_entity_category = EntityCategory.DIAGNOSTIC
