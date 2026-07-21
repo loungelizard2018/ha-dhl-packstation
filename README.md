@@ -5,38 +5,32 @@
 [![GitHub release](https://img.shields.io/github/v/release/loungelizard2018/ha-dhl-packstation)](https://github.com/loungelizard2018/ha-dhl-packstation/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Home Assistant custom integration for the statistical capacity forecast provided by the official DHL Location Finder API.
+Home Assistant custom integration for the statistical Packstation capacity forecast provided by the official DHL Location Finder API.
 
 > [!IMPORTANT]
-> DHL does **not** expose the current live fill level of a Packstation. The API provides weekday-based statistical forecasts derived from previous weeks.
+> DHL does **not** expose a live fill level. The API supplies weekday-based statistical forecasts derived from previous weeks.
 
 ## Features
 
 - Official DHL Location Finder API
-- Configuration through **Settings → Devices & services**
+- Configuration through Home Assistant's UI
 - Multiple Packstations supported
-- Editable API key, country, postal code, Packstation number and display name
-- Configurable polling interval
-- Forecast sensor for the current local weekday
-- Seven individual weekday forecast sensors
-- Human-readable localized sensor states
-- Last successful update timestamp
+- Forecast for today plus seven weekday entities
+- Localized states in German and English
+- Last successful update sensor
 - Manual refresh button
-- Three bundled Lovelace layouts: full, compact and row
-- German and English Home Assistant translations
+- Three bundled Lovelace layouts: `full`, `compact` and `row`
 - No dependency on `button-card` or `card-mod`
-- Dark-dashboard optimized card design
 
 ## Installation with HACS
 
 1. Open HACS.
-2. Open the menu and select **Custom repositories**.
-3. Add `https://github.com/loungelizard2018/ha-dhl-packstation`.
-4. Select category **Integration**.
-5. Download the latest release.
-6. Restart Home Assistant completely.
-7. Open **Settings → Devices & services → Add integration**.
-8. Search for **DHL Packstation Capacity**.
+2. Open **Custom repositories**.
+3. Add `https://github.com/loungelizard2018/ha-dhl-packstation` as category **Integration**.
+4. Download the latest release.
+5. Restart Home Assistant completely.
+6. Open **Settings → Devices & services → Add integration**.
+7. Search for **DHL Packstation Capacity**.
 
 ## Obtain a DHL API key
 
@@ -44,13 +38,13 @@ This integration requires a free DHL Developer API key.
 
 1. Create or sign in to a [DHL Developer account](https://developer.dhl.com/).
 2. Create an application in the DHL Developer Portal.
-3. Add or subscribe to the **Location Finder API**.
-4. Generate or copy the application's API key.
-5. Enter the key in the Home Assistant integration setup.
+3. Subscribe the application to the **Location Finder API**.
+4. Copy the generated API key.
+5. Enter the key during integration setup in Home Assistant.
 
-See the official [DHL Location Finder API documentation](https://developer.dhl.com/api-reference/location-finder) for API details.
+Official documentation: [DHL Location Finder API](https://developer.dhl.com/api-reference/location-finder)
 
-The integration sends the key only to DHL's API. Downloaded Home Assistant diagnostics redact it.
+The API key is sent only to DHL. Home Assistant diagnostics redact it.
 
 ## Configuration
 
@@ -62,39 +56,28 @@ The setup dialog asks for:
 - Packstation number
 - optional display name
 
-The integration validates the values against DHL before saving them.
-
-After setup, open the integration entry and select **Configure** to change:
-
-- API key
-- country code
-- postal code
-- Packstation number
-- display name
-- update interval
+The values are validated against DHL before they are saved. Open the integration entry and select **Configure** to change the station, display name, API key or update interval later.
 
 ## Entities
 
 Each configured Packstation creates ten entities:
 
-| Entity | Example entity ID | Purpose |
-|---|---|---|
-| Capacity forecast today | `sensor.aldi_odendorf_capacity_forecast_today` | Forecast for the current local weekday |
-| Forecast Monday | `sensor.aldi_odendorf_forecast_monday` | Monday forecast |
-| Forecast Tuesday | `sensor.aldi_odendorf_forecast_tuesday` | Tuesday forecast |
-| Forecast Wednesday | `sensor.aldi_odendorf_forecast_wednesday` | Wednesday forecast |
-| Forecast Thursday | `sensor.aldi_odendorf_forecast_thursday` | Thursday forecast |
-| Forecast Friday | `sensor.aldi_odendorf_forecast_friday` | Friday forecast |
-| Forecast Saturday | `sensor.aldi_odendorf_forecast_saturday` | Saturday forecast |
-| Forecast Sunday | `sensor.aldi_odendorf_forecast_sunday` | Sunday forecast |
-| Last update | `sensor.aldi_odendorf_last_update` | Timestamp of the last successful DHL request |
-| Refresh now | `button.aldi_odendorf_refresh_now` | Manual API refresh |
+| Entity | Purpose |
+|---|---|
+| Capacity forecast today | Forecast for the current local weekday |
+| Forecast Monday | Monday forecast |
+| Forecast Tuesday | Tuesday forecast |
+| Forecast Wednesday | Wednesday forecast |
+| Forecast Thursday | Thursday forecast |
+| Forecast Friday | Friday forecast |
+| Forecast Saturday | Saturday forecast |
+| Forecast Sunday | Sunday forecast |
+| Last update | Timestamp of the last successful DHL request |
+| Refresh now | Manual API refresh |
 
-Entity IDs are generated by Home Assistant and may differ from these examples.
+Entity IDs are generated by Home Assistant and can differ between installations. Use the entity marked with the attribute `data_type: average_capacity_by_weekday` for the Lovelace card.
 
 ### Forecast states
-
-The integration normalizes DHL's values as Home Assistant enum states:
 
 | Internal state | English UI | German UI | Card color |
 |---|---|---|---|
@@ -105,27 +88,21 @@ The integration normalizes DHL's values as Home Assistant enum states:
 
 ## Lovelace card
 
-The integration bundles `custom:dhl-packstation-card` and registers it as a JavaScript module. Use the actual current-day capacity entity ID from **Developer tools → States**.
-
-The screenshots below were captured from a live Home Assistant system.
+The integration bundles `custom:dhl-packstation-card` and registers it as a JavaScript module.
 
 ### Full view
 
-Displays the location, current forecast, status-dependent background and complete weekly forecast.
-
-![Full DHL Packstation card](docs/images/card-full.jpg)
-
 ```yaml
 type: custom:dhl-packstation-card
-entity: sensor.aldi_odendorf_capacity_forecast_today
+entity: sensor.your_packstation_capacity_forecast_today
 view: full
 ```
 
-Optional settings:
+Optional map button and custom title:
 
 ```yaml
 type: custom:dhl-packstation-card
-entity: sensor.aldi_odendorf_capacity_forecast_today
+entity: sensor.your_packstation_capacity_forecast_today
 view: full
 name: Packstation Odendorf
 show_map: true
@@ -133,130 +110,77 @@ show_map: true
 
 ### Compact view
 
-Keeps the station graphic, station name and current forecast while omitting the weekly details.
-
-![Compact DHL Packstation card](docs/images/card-compact.jpg)
-
 ```yaml
 type: custom:dhl-packstation-card
-entity: sensor.aldi_odendorf_capacity_forecast_today
+entity: sensor.your_packstation_capacity_forecast_today
 view: compact
 ```
 
 ### Row view
 
-Designed for dense dashboards and displays the station name plus forecast indicator in one line.
-
-![Row DHL Packstation card](docs/images/card-row.jpg)
-
 ```yaml
 type: custom:dhl-packstation-card
-entity: sensor.aldi_odendorf_capacity_forecast_today
+entity: sensor.your_packstation_capacity_forecast_today
 view: row
 show_status_text: true
 ```
 
-Hide the status text and retain only the colored indicator:
+Hide the text and keep only the colored status indicator:
 
 ```yaml
 type: custom:dhl-packstation-card
-entity: sensor.aldi_odendorf_capacity_forecast_today
+entity: sensor.your_packstation_capacity_forecast_today
 view: row
 show_status_text: false
 ```
 
-## Automation examples
+The card automatically falls back to the correct current-day entity if an older dashboard still references one of the weekday entities from a previous prerelease.
 
-Notify when today's statistical forecast changes to good availability:
+## Automation example
 
 ```yaml
-alias: Packstation capacity is good
+alias: Packstation forecast is good
 triggers:
   - trigger: state
-    entity_id: sensor.aldi_odendorf_capacity_forecast_today
+    entity_id: sensor.your_packstation_capacity_forecast_today
     to: high
 actions:
   - action: notify.mobile_app_your_phone
     data:
-      title: Packstation Odendorf
+      title: Packstation
       message: DHL forecasts many free compartments today.
 mode: single
 ```
 
-Use a weekday forecast as a condition:
-
-```yaml
-conditions:
-  - condition: state
-    entity_id: sensor.aldi_odendorf_forecast_tuesday
-    state: high
-```
-
-Remember that these values are statistical forecasts, not live occupancy measurements.
-
-## Forecast attributes
-
-The current-day sensor also exposes normalized attributes for custom dashboards and automations:
-
-```yaml
-capacity_today: high
-current_weekday: Tuesday
-weekly_forecast:
-  Monday: very_low
-  Tuesday: high
-  Wednesday: very_low
-  Thursday: very_low
-  Friday: very_low
-  Saturday: very_low
-  Sunday: very_low
-is_live_data: false
-```
-
 ## Card resource troubleshooting
 
-If Home Assistant reports:
-
-```text
-Custom element doesn't exist: dhl-packstation-card
-```
-
-check **Settings → Dashboards → Resources**. The resource should exist as a JavaScript module:
+If Home Assistant reports `Custom element doesn't exist: dhl-packstation-card`, verify that this JavaScript module exists under **Settings → Dashboards → Resources**:
 
 ```text
 /dhl_packstation_static/dhl-packstation-card.js?v=<installed-version>
 ```
 
-After an update:
+After updating:
 
 1. Restart Home Assistant completely.
 2. Hard-refresh the browser.
-3. Close and reopen the mobile app if required.
-4. Remove obsolete duplicate resources that reference an older version.
+3. Close and reopen the mobile app.
+4. Remove obsolete duplicate resources referencing older versions.
 
 ## Existing entity names after an upgrade
 
-Home Assistant may retain manually customized entity names in its entity registry. The integration supplies translated names such as **Forecast Monday** or **Prognose Montag**. If an old custom name remains, open the entity settings, clear the custom name and restore the integration-provided name.
+Home Assistant can retain names or entity IDs from an earlier prerelease in its entity registry. The integration keeps stable unique IDs, so automations continue to work. To restore the integration-provided name, open the entity settings and clear any manually stored name.
 
-## Privacy and diagnostics
+## Privacy and limitations
 
-- The API key is stored in the Home Assistant config entry.
-- It is sent only to DHL's Location Finder API.
-- Downloaded diagnostics redact the API key.
+- No live compartment occupancy is available through this API.
+- Forecast quality and available weekdays are controlled by DHL.
 - No analytics or telemetry are included.
-
-## Limitations
-
-- No live compartment occupancy is available through this DHL API.
-- The forecast quality and available weekdays are controlled by DHL.
 - This project is independent and is not affiliated with or endorsed by DHL.
-
-## Development and validation
-
-The repository includes GitHub Actions for HACS and Home Assistant Hassfest validation. Both workflows should pass before a public release is published.
 
 ## Support
 
-Use [GitHub Issues](https://github.com/loungelizard2018/ha-dhl-packstation/issues) for reproducible defects and feature requests. Do not include API keys in issue descriptions, screenshots or diagnostics pasted manually.
+Use [GitHub Issues](https://github.com/loungelizard2018/ha-dhl-packstation/issues) for reproducible defects and feature requests. Never publish an API key in an issue, screenshot or manually pasted diagnostic.
 
 ## License
 
