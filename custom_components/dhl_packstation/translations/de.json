@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "DHL Packstation einrichten",
-        "description": "Statistische Kapazitätsprognose, kein Live-Füllstand.",
+        "description": "Die DHL Location Finder API liefert eine statistische Kapazitätsprognose, keinen Live-Füllstand.",
         "data": {
           "api_key": "DHL API-Schlüssel",
           "country_code": "Ländercode",
@@ -15,24 +15,36 @@
     },
     "error": {
       "cannot_connect": "Verbindung zu DHL fehlgeschlagen.",
-      "invalid_auth": "API-Schlüssel abgelehnt.",
-      "station_not_found": "Packstation nicht gefunden.",
-      "invalid_response": "Unerwartete DHL-Antwort.",
+      "invalid_auth": "Der API-Schlüssel wurde abgelehnt.",
+      "station_not_found": "Die Packstation wurde nicht gefunden.",
+      "invalid_response": "DHL hat eine unerwartete Antwort geliefert.",
       "unknown": "Unbekannter Fehler."
     },
     "abort": {
-      "already_configured": "Packstation bereits eingerichtet."
+      "already_configured": "Diese Packstation ist bereits eingerichtet."
     }
   },
   "options": {
     "step": {
       "init": {
         "title": "DHL Packstation konfigurieren",
+        "description": "API-Schlüssel, Standort, Anzeigename und Abrufintervall ändern. Die Angaben werden vor dem Speichern bei DHL geprüft.",
         "data": {
+          "api_key": "DHL API-Schlüssel",
+          "country_code": "Ländercode",
+          "postal_code": "Postleitzahl",
+          "station_number": "Packstationsnummer",
           "display_name": "Anzeigename",
-          "update_interval": "Aktualisierungsintervall"
+          "update_interval": "Aktualisierungsintervall in Stunden"
         }
       }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zu DHL fehlgeschlagen.",
+      "invalid_auth": "Der API-Schlüssel wurde abgelehnt.",
+      "station_not_found": "Die Packstation wurde nicht gefunden.",
+      "invalid_response": "DHL hat eine unerwartete Antwort geliefert.",
+      "unknown": "Unbekannter Fehler."
     }
   },
   "entity": {
