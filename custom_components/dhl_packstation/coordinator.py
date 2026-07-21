@@ -3,6 +3,7 @@ import logging
 
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .api import DHLAuthError, DHLError
 from .const import (
@@ -22,6 +23,7 @@ class DHLPackstationCoordinator(DataUpdateCoordinator):
     def __init__(self, hass, entry, client):
         self.entry = entry
         self.client = client
+        self.last_successful_update = None
         super().__init__(
             hass,
             _LOGGER,
@@ -39,7 +41,7 @@ class DHLPackstationCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         try:
-            return await self.client.async_get_station(
+            data = await self.client.async_get_station(
                 country_code=self.entry.data[CONF_COUNTRY_CODE],
                 postal_code=self.entry.data[CONF_POSTAL_CODE],
                 station_number=self.entry.data[CONF_STATION_NUMBER],
@@ -48,6 +50,8 @@ class DHLPackstationCoordinator(DataUpdateCoordinator):
                     self.entry.data.get(CONF_DISPLAY_NAME),
                 ),
             )
+            self.last_successful_update = dt_util.utcnow()
+            return data
         except DHLAuthError as err:
             raise ConfigEntryAuthFailed from err
         except DHLError as err:
