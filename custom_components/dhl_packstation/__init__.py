@@ -9,6 +9,7 @@ from homeassistant.components.lovelace.const import LOVELACE_DATA
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ID, CONF_TYPE, CONF_URL
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import DHLPackstationApiClient
@@ -16,7 +17,9 @@ from .const import CARD_URL, CONF_API_KEY, DOMAIN, PLATFORMS, STATIC_URL
 from .coordinator import DHLPackstationCoordinator
 
 _LOGGER = logging.getLogger(__name__)
-_CARD_RESOURCE_URL = f"{CARD_URL}?v=0.1.3"
+_CARD_RESOURCE_URL = f"{CARD_URL}?v=0.1.4"
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
@@ -87,8 +90,6 @@ async def _async_register_card(hass: HomeAssistant) -> None:
 
     resources = lovelace_data.resources
     if not hasattr(resources, "async_create_item"):
-        # YAML resource mode cannot be changed by an integration. The frontend
-        # extra module URL above remains available for normal browser clients.
         return
 
     await resources.async_get_info()
