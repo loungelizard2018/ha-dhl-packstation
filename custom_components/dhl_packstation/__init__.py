@@ -17,7 +17,7 @@ from .const import CARD_URL, CONF_API_KEY, DOMAIN, PLATFORMS, STATIC_URL
 from .coordinator import DHLPackstationCoordinator
 
 _LOGGER = logging.getLogger(__name__)
-_CARD_RESOURCE_URL = f"{CARD_URL}?v=1.0.0"
+_CARD_RESOURCE_URL = f"{CARD_URL}?v=1.0.1"
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
@@ -85,12 +85,14 @@ async def _async_register_card(hass: HomeAssistant) -> None:
     if module_urls is not None:
         stale_module_urls = {
             url
-            for url in module_urls
+            for url in module_urls.urls
             if _resource_base_url(str(url)) == CARD_URL
             and str(url) != _CARD_RESOURCE_URL
         }
-        module_urls.difference_update(stale_module_urls)
-        module_urls.add(_CARD_RESOURCE_URL)
+        for stale_url in stale_module_urls:
+            module_urls.remove(stale_url)
+        if _CARD_RESOURCE_URL not in module_urls.urls:
+            module_urls.add(_CARD_RESOURCE_URL)
 
     lovelace_data = hass.data.get(LOVELACE_DATA)
     if lovelace_data is None:
