@@ -22,6 +22,11 @@ _CARD_RESOURCE_URL = f"{CARD_URL}?v=0.1.8"
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
+def _resource_base_url(url: str) -> str:
+    """Return a resource URL without any cache-busting query string."""
+    return url.partition("?")[0]
+
+
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Register the static files used by the bundled Lovelace card."""
     await hass.http.async_register_static_paths(
@@ -75,9 +80,16 @@ async def async_unload_entry(
 
 
 async def _async_register_card(hass: HomeAssistant) -> None:
-    """Load the bundled card and add it to storage-mode resources."""
+    """Register exactly one current Lovelace resource for the bundled card."""
     module_urls = hass.data.get(DATA_EXTRA_MODULE_URL)
     if module_urls is not None:
+        stale_module_urls = {
+            url
+            for url in module_urls
+            if _resource_base_url(str(url)) == CARD_URL
+            and str(url) != _CARD_RESOURCE_URL
+        }
+        module_urls.difference_update(stale_module_urls)
         module_urls.add(_CARD_RESOURCE_URL)
 
     lovelace_data = hass.data.get(LOVELACE_DATA)
@@ -94,16 +106,13 @@ async def _async_register_card(hass: HomeAssistant) -> None:
 
     await resources.async_get_info()
     items = resources.async_items() or []
-    existing = next(
-        (
-            item
-            for item in items
-            if str(item.get(CONF_URL, "")).split("?", 1)[0] == CARD_URL
-        ),
-        None,
-    )
+    matching = [
+        item
+        for item in items
+        if _resource_base_url(str(item.get(CONF_URL, ""))) == CARD_URL
+    ]
 
-    if existing is None:
+    if not matching:
         await resources.async_create_item(
             {
                 "res_type": "module",
@@ -113,19 +122,31 @@ async def _async_register_card(hass: HomeAssistant) -> None:
         _LOGGER.info("Registered DHL Packstation Lovelace card resource")
         return
 
+    primary = matching[0]
+    primary_id = primary.get(CONF_ID)
     if (
-        existing.get(CONF_URL) != _CARD_RESOURCE_URL
-        and existing.get(CONF_ID)
+        primary_id
+        and primary.get(CONF_URL) != _CARD_RESOURCE_URL
         and hasattr(resources, "async_update_item")
     ):
         await resources.async_update_item(
-            existing[CONF_ID],
+            primary_id,
             {
-                "res_type": existing.get(CONF_TYPE, "module"),
+                "res_type": primary.get(CONF_TYPE, "module"),
                 CONF_URL: _CARD_RESOURCE_URL,
             },
         )
         _LOGGER.info("Updated DHL Packstation Lovelace card resource")
+
+    if hasattr(resources, "async_delete_item"):
+        for duplicate in matching[1:]:
+            duplicate_id = duplicate.get(CONF_ID)
+            if duplicate_id:
+                await resources.async_delete_item(duplicate_id)
+                _LOGGER.info(
+                    "Removed duplicate DHL Packstation Lovelace resource %s",
+                    duplicate.get(CONF_URL),
+                )
 
 
 async def _async_reload_entry(
