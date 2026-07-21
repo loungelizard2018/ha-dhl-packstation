@@ -46,9 +46,38 @@ const DAYS = {
 };
 const ORDER = Object.keys(DAYS);
 
+const STATUS_ALIASES = {
+  high: "high",
+  "very high": "high",
+  "many free compartments": "high",
+  "many free lockers": "high",
+  "viele freie fächer": "high",
+  "gute kapazität": "high",
+  low: "low",
+  "few free compartments": "low",
+  "few free lockers": "low",
+  "wenige freie fächer": "low",
+  "geringe kapazität": "low",
+  very_low: "very_low",
+  "very-low": "very_low",
+  "very low": "very_low",
+  "almost full": "very_low",
+  "fast voll": "very_low",
+  "sehr geringe kapazität": "very_low",
+  unknown: "unknown",
+  unavailable: "unknown",
+  none: "unknown",
+  "keine prognose": "unknown",
+};
+
 function normalizeStatus(value) {
-  if (value === "very-low") return "very_low";
-  return STATUS[value] ? value : "unknown";
+  if (value === null || value === undefined) return "unknown";
+  const normalized = String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
+  return STATUS_ALIASES[normalized] || "unknown";
 }
 
 class DHLPackstationCard extends HTMLElement {
