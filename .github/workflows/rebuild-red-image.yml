@@ -39,9 +39,7 @@ jobs:
                   # Recolor only green neon/glow/reflection pixels.
                   # Yellow/orange locker surfaces remain untouched.
                   if 0.20 <= h <= 0.46 and s >= 0.18 and v >= 0.10 and g > r * 1.05:
-                      new_h = 0.0
-                      new_s = min(1.0, max(s, 0.62))
-                      nr, ng, nb = colorsys.hsv_to_rgb(new_h, new_s, v)
+                      nr, ng, nb = colorsys.hsv_to_rgb(0.0, min(1.0, max(s, 0.62)), v)
                       pixels[x, y] = (
                           round(nr * 255),
                           round(ng * 255),
